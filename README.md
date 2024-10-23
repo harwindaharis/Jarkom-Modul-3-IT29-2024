@@ -1,4 +1,4 @@
-# Jarkom-Modul-2-IT29-2024
+# Jarkom-Modul-3-IT29-2024
 
 ## Anggota Kelompok
 | Nama | NRP |
