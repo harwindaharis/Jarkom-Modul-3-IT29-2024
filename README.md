@@ -160,3 +160,84 @@ iface eth0 inet static
 auto eth0
 iface eth0 inet dhcp
 ```
+
+## Soal 0
+
+Pulau Paradis telah menjadi tempat yang damai selama 1000 tahun, namun kedamaian tersebut tidak bertahan selamanya. Perang antara kaum Marley dan Eldia telah mencapai puncak. Kaum Marley yang dipimpin oleh Zeke, me-register domain name marley.yyy.com untuk worker Laravel mengarah pada Annie. Namun ternyata tidak hanya kaum Marley saja yang berinisiasi, kaum Eldia ternyata sudah mendaftarkan domain name eldia.yyy.com untuk worker PHP mengarah pada Armin. (0)
+
+```
+echo 'nameserver 192.168.122.1' > /etc/resolv.conf
+apt-get update
+apt-get install bind9 -y  
+
+echo "zone \"marley.it29.com\" {
+	type master;
+	file \"/etc/bind/jarkom/marley.it29.com\";
+};
+
+zone \"eldia.it29.com\" {
+	type master;
+	file \"/etc/bind/jarkom/eldia.it29.com\";
+};
+" > /etc/bind/named.conf.local
+
+mkdir /etc/bind/jarkom
+
+marley="
+;
+;BIND data file for local loopback interface
+;
+\$TTL    604800
+@    IN    SOA    marley.it29.com. root.marley.it29.com. (
+        2        ; Serial
+                604800        ; Refresh
+                86400        ; Retry
+                2419200        ; Expire
+                604800 )    ; Negative Cache TTL
+;                   
+@    IN    NS    marley.it29.com.
+@       IN    A    10.78.1.2
+"
+echo "$marley" > /etc/bind/jarkom/marley.it29.com
+
+eldia="
+;
+;BIND data file for local loopback interface
+;
+\$TTL    604800
+@    IN    SOA    eldia.it29.com. root.eldia.it29.com. (
+        2        ; Serial
+                604800        ; Refresh
+                86400        ; Retry
+                2419200        ; Expire
+                604800 )    ; Negative Cache TTL
+;                   
+@    IN    NS    eldia.it29.com.
+@       IN    A    10.78.2.2
+"
+echo "$eldia" > /etc/bind/jarkom/eldia.it29.com
+
+service bind9 restart
+
+```
+
+## Soal 1
+
+Lakukan konfigurasi sesuai dengan peta yang sudah diberikan. (1)
+
+Sesuai Config di Atas
+
+## Soal [ 2 - 5 ]
+
+Client yang melalui bangsa marley mendapatkan range IP dari [prefix IP].1.05 - [prefix IP].1.25 dan [prefix IP].1.50 - [prefix IP].1.100 (2)
+
+Client yang melalui bangsa eldia mendapatkan range IP dari [prefix IP].2.09 - [prefix IP].2.27 dan [prefix IP].2 .81 - [prefix IP].2.243 (3)
+
+Client mendapatkan DNS dari keluarga Fritz dan dapat terhubung dengan internet melalui DNS tersebut (4)
+
+Dikarenakan keluarga Tybur tidak menyukai kaum eldia, maka mereka hanya meminjamkan ip address ke kaum eldia selama 6 menit. Namun untuk kaum marley, keluarga Tybur meminjamkan ip address selama 30 menit. Waktu maksimal dialokasikan untuk peminjaman alamat IP selama 87 menit. (5)
+
+
+
+
+
