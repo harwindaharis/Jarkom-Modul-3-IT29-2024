@@ -385,7 +385,17 @@ subnet 10.78.2.0 netmask 255.255.255.0 {
 ```
 
 > lalu jalankan dengan ./tybur.bashrc, namun sebelumnya pastikan telah menjalankan command chmod +x tybur.bashrc
-> 
+
+### Testing
+a. ping domain dari Client (Erwin)
+
+<img width="474" alt="image" src="https://github.com/user-attachments/assets/b75f80fa-f42d-469b-8f84-9d5600225eed">
+
+
+<img width="438" alt="image" src="https://github.com/user-attachments/assets/903454e7-73d1-4b60-8f4f-332648e6206f">
+
+
+
 
 </details>
 
