@@ -161,21 +161,50 @@ iface eth0 inet dhcp
 
 ## Soal 0
 
-Pulau Paradis telah menjadi tempat yang damai selama 1000 tahun, namun kedamaian tersebut tidak bertahan selamanya. Perang antara kaum Marley dan Eldia telah mencapai puncak. Kaum Marley yang dipimpin oleh Zeke, me-register domain name marley.yyy.com untuk worker Laravel mengarah pada Annie. Namun ternyata tidak hanya kaum Marley saja yang berinisiasi, kaum Eldia ternyata sudah mendaftarkan domain name eldia.yyy.com untuk worker PHP mengarah pada Armin. (0)
+Pulau Paradis telah menjadi tempat yang damai selama 1000 tahun, namun kedamaian tersebut tidak bertahan selamanya. Perang antara kaum Marley dan Eldia telah mencapai puncak. Kaum Marley yang dipimpin oleh Zeke, me-register domain name [marley.yyy.com](http://marley.yyy.com/) untuk worker Laravel mengarah pada Annie. Namun ternyata tidak hanya kaum Marley saja yang berinisiasi, kaum Eldia ternyata sudah mendaftarkan domain name [eldia.yyy.com](http://eldia.yyy.com/) untuk worker PHP mengarah pada Armin. (0)
+
+<details>
+<summary> Jawaban </summary>
+
+### Setup DNS pada Fritz (DNS Server)
+
+a. Instalasi dependencies yang diperlukan pada `nano /root/.bashrc`
 
 ```
 echo 'nameserver 192.168.122.1' > /etc/resolv.conf
 apt-get update
-apt-get install bind9 -y  
+apt-get install bind9 -y
 
-echo "zone \"marley.it29.com\" {
+```
+
+b. Buat `nano fritz.bashrc` lalu jalankan dengan `./fritz.bashrc`, namun sebelumnya pastikan telah menjalankan command `chmod +x fritz.bashrc`
+
+```
+
+forward="options {
+	listen-on-v6 { none; };
+	directory \\"/var/cache/bind\\";
+
+	forwarders {
+  	   192.168.122.1;
+	};
+
+	forward only;
+	dnssec-validation no;
+
+	auth-nxdomain no;
+	allow-query{ any; };
+};"
+
+echo "$forward" > /etc/bind/named.conf.options
+echo "zone \\"marley.it29.com\\" {
 	type master;
-	file \"/etc/bind/jarkom/marley.it29.com\";
+	file \\"/etc/bind/it29/marley.it29.com\\";
 };
 
-zone \"eldia.it29.com\" {
+zone \\"eldia.it29.com\\" {
 	type master;
-	file \"/etc/bind/jarkom/eldia.it29.com\";
+	file \\"/etc/bind/it29/eldia.it29.com\\";
 };
 " > /etc/bind/named.conf.local
 
@@ -185,39 +214,41 @@ marley="
 ;
 ;BIND data file for local loopback interface
 ;
-\$TTL    604800
+\\$TTL    604800
 @    IN    SOA    marley.it29.com. root.marley.it29.com. (
         2        ; Serial
                 604800        ; Refresh
                 86400        ; Retry
                 2419200        ; Expire
                 604800 )    ; Negative Cache TTL
-;                   
+;
 @    IN    NS    marley.it29.com.
 @       IN    A    10.78.1.2
 "
-echo "$marley" > /etc/bind/jarkom/marley.it29.com
+echo "$marley" > /etc/bind/it29/marley.it29.com
 
 eldia="
 ;
 ;BIND data file for local loopback interface
 ;
-\$TTL    604800
+\\$TTL    604800
 @    IN    SOA    eldia.it29.com. root.eldia.it29.com. (
         2        ; Serial
                 604800        ; Refresh
                 86400        ; Retry
                 2419200        ; Expire
                 604800 )    ; Negative Cache TTL
-;                   
+;
 @    IN    NS    eldia.it29.com.
 @       IN    A    10.78.2.2
 "
-echo "$eldia" > /etc/bind/jarkom/eldia.it29.com
+echo "$eldia" > /etc/bind/it29/eldia.it29.com
 
 service bind9 restart
 
 ```
+
+</details>
 
 ## Soal 1
 
@@ -244,12 +275,12 @@ b.  Buat `nano tybur.bashrc` lalu jalankan dengan `./tybur.bashrc`, namun sebelu
 echo 'INTERFACES="eth0"' > /etc/default/isc-dhcp-server
 
 echo 'subnet 10.78.1.0 netmask 255.255.255.0 {
-	option routers 10.78.1.0;
+	option routers 10.78.1.1;
 	option broadcast-address 10.78.1.255;
 	option domain-name-servers 10.78.4.2; #IP DNS Server (Fritz)
 }
 subnet 10.78.2.0 netmask 255.255.255.0 {
-	option routers 10.78.2.0;
+	option routers 10.78.2.1;
 	option broadcast-address 10.78.2.255;
 	option domain-name-servers 10.78.4.2; #IP DNS Server (Fritz)
 }
@@ -301,13 +332,13 @@ a. pada file tybur.bashrc (`nano tybur.bashrc`) Edit konfigurasi subnet 10.78.1.
 subnet 10.78.1.0 netmask 255.255.255.0 {
 	range 10.78.1.05 10.78.1.25;
 	range 10.78.1.50 10.78.1.100;
-	option routers 10.78.1.0;
+	option routers 10.78.1.1;
 	option broadcast-address 10.78.1.255;
 }
 subnet 10.78.2.0 netmask 255.255.255.0 {
 	range 10.78.2.09 10.78.2.27;
 	range 10.78.2.81 10.78.2.243;
-	option routers 10.78.2.0;
+	option routers 10.78.2.1;
 	option broadcast-address 10.78.2.255;
 }
 
@@ -339,14 +370,14 @@ a. pada file tybur.bashrc (`nano tybur.bashrc`) Edit konfigurasi subnet 10.78.1.
 subnet 10.78.1.0 netmask 255.255.255.0 {
 	range 10.78.1.05 10.78.1.25;
 	range 10.78.1.50 10.78.1.100;
-	option routers 10.78.1.0;
+	option routers 10.78.1.1;
 	option broadcast-address 10.78.1.255;
 	option domain-name-servers 10.78.4.2; # IP DNS Server (Fritz)
 }
 subnet 10.78.2.0 netmask 255.255.255.0 {
 	range 10.78.2.09 10.78.2.27;
 	range 10.78.2.81 10.78.2.243;
-	option routers 10.78.2.0;
+	option routers 10.78.2.1;
 	option broadcast-address 10.78.2.255;
 	option domain-name-servers 10.78.4.2; # IP DNS Server (Fritz)
 }
@@ -373,7 +404,7 @@ a. pada file tybur.bashrc (`nano tybur.bashrc`) Edit konfigurasi subnet 10.78.1.
 subnet 10.78.1.0 netmask 255.255.255.0 {
 	range 10.78.1.05 10.78.1.25;
 	range 10.78.1.50 10.78.1.100;
-	option routers 10.78.1.0;
+	option routers 10.78.1.1;
 	option broadcast-address 10.78.1.255;
 	option domain-name-servers 10.78.4.2; # IP Fritz (DNS Server)
 	default-lease-time 1800;
@@ -384,7 +415,7 @@ subnet 10.78.1.0 netmask 255.255.255.0 {
 subnet 10.78.2.0 netmask 255.255.255.0 {
 	range 10.78.2.09 10.78.2.27;
 	range 10.78.2.81 10.78.2.243;
-	option routers 10.78.2.0;
+	option routers 10.78.2.1;
 	option broadcast-address 10.78.2.255;
 	option domain-name-servers 10.78.4.2; # IP Fritz (DNS Server)
 	default-lease-time 360;
