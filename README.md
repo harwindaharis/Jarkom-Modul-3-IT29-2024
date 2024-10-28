@@ -177,73 +177,68 @@ apt-get install bind9 -y
 
 ```
 
-b. Buat `nano fritz.bashrc` lalu jalankan dengan `./fritz.bashrc`, namun sebelumnya pastikan telah menjalankan command `chmod +x fritz.bashrc`
+b. Buat `nano dns.sh` lalu jalankan dengan `./dns.sh`, namun sebelumnya pastikan telah menjalankan command `chmod +x dns.sh`
 
 ```
 
-forward="options {
-	listen-on-v6 { none; };
-	directory \\"/var/cache/bind\\";
+#!/bin/bash
 
-	forwarders {
-  	   192.168.122.1;
-	};
+# Update sistem
+apt-get update
 
-	forward only;
-	dnssec-validation no;
+# Install bind9
+apt-get install bind9 -y
 
-	auth-nxdomain no;
-	allow-query{ any; };
-};"
+# Mulai layanan bind9
+service bind9 start
 
-echo "$forward" > /etc/bind/named.conf.options
-echo "zone \\"marley.it29.com\\" {
-	type master;
-	file \\"/etc/bind/it29/marley.it29.com\\";
+# Tambahkan konfigurasi domain pada named.conf.local
+cat <<EOT >> /etc/bind/named.conf.local
+zone "marley.it29.com" {
+    type master;
+    file "/etc/bind/it29/marley.it29.com";
 };
 
-zone \\"eldia.it29.com\\" {
-	type master;
-	file \\"/etc/bind/it29/eldia.it29.com\\";
+zone "eldia.it29.com" {
+    type master;
+    file "/etc/bind/it29/eldia.it29.com";
 };
-" > /etc/bind/named.conf.local
+EOT
 
-mkdir /etc/bind/jarkom
+# Buat direktori jika belum ada
+mkdir -p /etc/bind/it29
 
-marley="
+# Buat DNS record untuk marley.it29.com
+cat <<EOT > /etc/bind/it29/marley.it29.com
+\$TTL    604800
+@       IN      SOA     marley.it29.com. root.marley.it29.com. (
+                        2               ; Serial
+                        604800          ; Refresh
+                        86400           ; Retry
+                        2419200         ; Expire
+                        604800 )        ; Negative Cache TTL
 ;
-;BIND data file for local loopback interface
-;
-\\$TTL    604800
-@    IN    SOA    marley.it29.com. root.marley.it29.com. (
-        2        ; Serial
-                604800        ; Refresh
-                86400        ; Retry
-                2419200        ; Expire
-                604800 )    ; Negative Cache TTL
-;
-@    IN    NS    marley.it29.com.
-@       IN    A    10.78.1.2
-"
-echo "$marley" > /etc/bind/it29/marley.it29.com
+@       IN      NS      marley.it29.com.
+@       IN      A       10.78.1.2       ; IP Annie
+www     IN      CNAME   marley.it29.com.
+EOT
 
-eldia="
+# Buat DNS record untuk eldia.it29.com
+cat <<EOT > /etc/bind/it29/eldia.it29.com
+\$TTL    604800
+@       IN      SOA     eldia.it29.com. root.eldia.it29.com. (
+                        2               ; Serial
+                        604800          ; Refresh
+                        86400           ; Retry
+                        2419200         ; Expire
+                        604800 )        ; Negative Cache TTL
 ;
-;BIND data file for local loopback interface
-;
-\\$TTL    604800
-@    IN    SOA    eldia.it29.com. root.eldia.it29.com. (
-        2        ; Serial
-                604800        ; Refresh
-                86400        ; Retry
-                2419200        ; Expire
-                604800 )    ; Negative Cache TTL
-;
-@    IN    NS    eldia.it29.com.
-@       IN    A    10.78.2.2
-"
-echo "$eldia" > /etc/bind/it29/eldia.it29.com
+@       IN      NS      eldia.it29.com.
+@       IN      A       10.78.2.2       ; IP Armin
+www     IN      CNAME   eldia.it29.com.
+EOT
 
+# Restart layanan bind9 untuk menerapkan perubahan
 service bind9 restart
 
 ```
@@ -389,11 +384,22 @@ subnet 10.78.2.0 netmask 255.255.255.0 {
 ### Testing
 a. ping domain dari Client (Erwin)
 
+
 <img width="474" alt="image" src="https://github.com/user-attachments/assets/b75f80fa-f42d-469b-8f84-9d5600225eed">
+
+
+<img width="476" alt="image" src="https://github.com/user-attachments/assets/9ddc4343-73a5-447a-93a3-ff72bbf1f1ee">
+
+
+
+
+b. ping domain dari Client (Zeke)
 
 
 <img width="438" alt="image" src="https://github.com/user-attachments/assets/903454e7-73d1-4b60-8f4f-332648e6206f">
 
+
+<img width="420" alt="image" src="https://github.com/user-attachments/assets/b227649b-f08e-4496-b290-d55920b8f4c2">
 
 
 
@@ -433,6 +439,20 @@ subnet 10.78.2.0 netmask 255.255.255.0 {
 }
 
 ```
+
+###Testing
+
+Restart lalu buka web console pada client
+
+```
+service isc-dhcp-server restart
+```
+
+<img width="516" alt="image" src="https://github.com/user-attachments/assets/8befef05-aae1-472c-b3b4-f9f0775a4a09">
+
+<img width="520" alt="image" src="https://github.com/user-attachments/assets/250d0afb-0790-426e-a474-aab9621cf1a3">
+
+
 
 </details>
 
