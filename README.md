@@ -456,5 +456,88 @@ service isc-dhcp-server restart
 
 </details>
 
+## Soal 6
+Armin berinisiasi untuk memerintahkan setiap worker PHP untuk melakukan konfigurasi virtual host untuk website berikut https://intip.in/BangsaEldia dengan menggunakan php 7.3 (6)
+<details>
+<summary> Jawaban </summary>
+
+## Setup PHP Worker (Armin, Eren, Mikasa)
+a. Instalasi dependencies yang diperlukan: `nano /root/.bashrc`
+
+```
+apt-get update
+apt-get install lynx nginx wget unzip php7.3 php-fpm -y
+```
+
+b. Buat  `nano armin.bashrc`, `nano eren.bashrc`, `nano mikasa.bashrc`, pastikan sebelumnya `cd root/`
+
+```
+# jalankan seervice php dan nginx
+service php7.3-fpm start
+service nginx start
+
+# download resource website
+wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1WhVXL6AejH-onwYpMClA6c_7WpQjY0Pr' -O /var/www/html/modul-3.zip
+unzip /var/www/html/modul-3.zip -d /var/www/html/
+mv /var/www/html/modul-3/* /var/www/html/
+rm -r /var/www/html/modul-3
+
+# tambahkan configurasi sites-available
+echo 'server {
+	listen 80;
+
+	root /var/www/html;
+
+	index index.php index.html index.htm;
+
+	server_name _;
+
+	location / {
+		try_files \$uri \$uri/ /index.php?\$query_string;
+	}
+
+	location ~ \.php$ {
+		include snippets/fastcgi-php.conf;
+		fastcgi_pass unix:/var/run/php/php7.3-fpm.sock;
+	}
+
+	error_log /var/log/nginx/jarkom-it29_error.log;
+	access_log /var/log/nginx/jarkom-it29_access.log;
+}' > /etc/nginx/sites-available/jarkom-it29.conf
+
+ln -s /etc/nginx/sites-available/jarkom-it29.conf /etc/nginx/sites-enabled
+
+rm /etc/nginx/sites-enabled/default
+
+# restart service php dan nginx
+service nginx restart
+service php7.3-fpm restart
+```
+
+### Testing
+
+a. Armin
+```
+lynx 10.78.2.2
+```
+
+<img width="542" alt="image" src="https://github.com/user-attachments/assets/ed6a5667-f740-4648-a59a-dbd89d262017">
+
+b. Eren
+```
+lynx 10.78.2.3
+```
+
+<img width="543" alt="image" src="https://github.com/user-attachments/assets/7177e074-415e-4d1e-8d8c-d1a6523e3ab6">
+
+
+c. Mikasa
+```
+lynx 10.78.2.4
+```
+<img width="542" alt="image" src="https://github.com/user-attachments/assets/e7d3ff47-51d4-487c-b38c-d1cc8719cf44">
+
+
+
 
 
